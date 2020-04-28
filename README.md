@@ -60,3 +60,58 @@ verify_ssl = true
 python_version = "3.8"
 ```
 
+# Debug Mode
+## 方法1
+
+```python
+app.debug = True
+app.run()
+```
+## 方法2
+
+```python
+app.run(debug=True)
+```
+## 方法3
+
+```python
+app.config.update(DEBUG=True)
+```
+## 方法4
+
+```python
+# 使用自定義config file，需要import config
+# 4.1 通過模組字串
+app.config.from_object(config)
+# 4.2 通過模組物件
+import config
+app.config.from_object('config')
+# 4.3
+app.config.from_pyfile('config.py', silent=True)
+# 4.4
+app.config.from_pyfile('config.ini', silent=True)
+```
+
+開啟了Debug Mode的畫面
+
+```
+* Serving Flask app "firstFlask" (lazy loading)
+* Environment: production
+  WARNING: This is a development server. Do not use it in a production deployment.
+  Use a production WSGI server instead.
+* Debug mode: on
+* Restarting with stat
+* Debugger is active!
+* Debugger PIN: 202-551-615
+* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+```
+
+# URL 與 視圖
+
+```
+string : 默認的資料類型，接受沒有任何斜杠/的字串
+int: 整形
+float: 浮點型。
+path： 和string類似，但是可以傳遞斜杠/。
+uuid： uuid類型的字串。any：可以指定多種路徑
+```
