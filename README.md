@@ -115,3 +115,134 @@ float: 浮點型。
 path： 和string類似，但是可以傳遞斜杠/。
 uuid： uuid類型的字串。any：可以指定多種路徑
 ```
+
+# URL For
+```python
+from flask import Flask, url_for
+
+app = Flask(__name__)
+
+
+@app.route('/')
+def home():
+    print(url_for('article', aid=1)) # /article/1
+    print(url_for('article', aid=1, page=1)) # /article/1?page=1
+    print(url_for('article', aid=1, page=1, name=1))  # /article/1?page=1&name=1
+    print(url_for('article', aid=1, page=1, name=1, type=1))  # /article/1?page=1&name=1&type=1
+    return 'Hello World!!!'
+
+
+@app.route('/article/<aid>')
+def article(aid):
+    return 'article list {}'.format(aid)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+```
+
+
+# 重定向 redirect
+```python
+from flask import Flask, request, redirect, url_for
+
+app = Flask(__name__)
+
+
+@app.route('/login')
+def login():
+    return 'login'
+
+
+@app.route('/profile/')
+def profile():
+    name = request.args.get('name')
+    if name:
+        return name
+    else:
+        return redirect(url_for('login'), code=301)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
+```
+
+# Response
+```python
+from flask import Flask, Response
+
+app = Flask(__name__)
+
+
+@app.route('/abouts/')
+def about():
+    # return 'jason'
+
+    # TypeError: The view function did not return a valid response.
+    # The return type must be a string, dict, tuple, Response instance, or WSGI callable, but it was a list.
+    # return [1,2,3]
+
+    # {
+    # "name": "abc",
+    # "pa": "a3"
+    # }
+    # return {'name':'abc', 'pa': 'a3'}
+
+    # name
+    # return ('name', 'jason')
+
+    # jason, status code
+    # return 'jason', 200
+
+    # jason text/html
+    return Response('jason', status=200, mimetype='text/html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5002)
+
+```
+
+# Flask Template
+```python
+from flask import Flask, render_template
+
+# template_folder盡量不要修改
+app = Flask(__name__, template_folder = 'template')
+
+
+@app.route('/')
+def home():
+    return render_template('ui/index.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5003)
+
+```
+
+# Flask Transfer Parameters
+
+```
+1. 方法 1
+return render_template('index.html', username='jason')
+在index.html中接收 {{username}}
+
+
+2. 方法 2
+context = {
+	'key':'value'
+}
+return render_template('index.html', context=context)
+在index.html中接收
+- {{context.key}}
+- {{context[key]}}
+
+return render_template('index.html', **context)
+在index.html中接收
+- {{key}}
+```
+
+
+
