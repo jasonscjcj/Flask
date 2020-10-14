@@ -1,0 +1,63 @@
+{% import 'macro.html' as macro  %}
+{% import 'macro.html' as macro  with context %} <!-- 包括參數 -->
+{% from 'macro.html' import input %} <!-- import 其中的組件 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<p>用戶名︰{{ macro.input('username') }}</p>
+<p>密碼︰{{input('password', type='password')}}</p>
+
+<h1>if for</h1>
+
+<p>=====Start String=====</p>
+{% if username == 'Jason' %}
+<p>{{username}}</p>
+{% else %}
+<p>當前用戶不是{{username}}</p>
+{% endif %}
+<p>=====End String=====</p>
+
+<p>=====Start List=====</p>
+{% for book in books %}
+<p>{{book}}</p>
+{% endfor %}
+<p>=====End List=====</p>
+
+
+<p>=====Start Dist=====</p>
+
+{% for b in book %}
+<p>{{b}}</p>
+{% endfor %}
+
+{% for (key,value) in book.items() %}
+<p>{{key}}</p>
+<p>{{value}}</p>
+{% endfor %}
+
+{% for (key,value) in book.items() %}
+<p>{{key}}</p>
+<p>{{value}}</p>
+<hr>
+{% endfor %}
+
+<p>=====End Dist=====</p>
+
+<!--    loop.index 當前迭代的索引（從1開始）
+    loop.index0 當前迭代的索引（從0開始）
+    loop.first 是否是第⼀次迭代，返回True或False
+    loop.last 是否是最後⼀次迭代，返回True或False
+    loop.length 序列的⻓度-->
+
+{% for book in books%}
+<p>{{loop.index}} {{book}}</p>
+{% endfor %}
+
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>Template Filter</h1>
+    <p>{{username}}</p>
+    <p>{{age|abs}}</p> <!-- abs = 絕對值 -->
+    <p>{{name|default('這個人很懶，什麼都沒有留下')}}</p> <!-- default = 如果name不存在，則會使⽤函數內的字符串來替代 -->
+
+    <!-- 關閉轉義 -->
+    {% autoescape off %}
+    <p>{{es}}</p>
+    {% endautoescape %}
+    <p>{{es}}</p> <!-- 變為字符串 -->
+    <p>{{es|safe}}</p> <!-- 如果開了全局轉義，關閉轉義-->
+
+    <p>{{books|first}}</p> <!-- 返回列表第一個元素-->
+    <p>{{books|last}}</p> <!-- 返回列表最後一個元素-->
+    <p>{{books|length}}</p> <!-- 返回列表總長度-->
+    <p>{{books|first|length}}</p> <!-- 返回列表第一個總長度-->
+    <p>{{book|length}}</p> <!-- 返回字典總長度-->
+
+    <p>{{username|replace('Jason', 'jess')}}</p>
+    <p>{{tc|truncate(length=5)}}</p>
+    <p>{{es|striptags}}</p> <!-- Delete HTML Tag -->
+    <p>{{tc|wordcount}}</p> <!-- 計算單字總數 -->
+
+</body>
+</html>
