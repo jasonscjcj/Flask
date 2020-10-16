@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Include</title>
+</head>
+    <body>
+        {% set username = 'Jason 全局變量' %}
+        {% include 'common/header.html' %}
+
+        <h1>首面</h1>
+        <p>{{ username }} </p> <!-- 局部變量 -->
+
+        {% with %}
+        {% set username = 'Jason' %}
+            <p>{{ username }}</p>
+        {% endwith %}
+        <p>{{ username }} </p> <!-- 全局變量 -->
+
+        {% with foo = '這是局部的' %} <!-- 局部變量 -->
+            <p>{{ foo }}</p>
+        {% endwith %}
+
+        {% with foo = {'name' : 'Amy'} %}
+            {% for (key, value) in foo.items() %}
+                <p>{{ key }}</p>
+                <p>{{ value }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        {% with foo = {'name' : 'Amy'} %}
+            {% for item in foo.values() %}
+               {# <p>{{ key }}</p> #}
+                <p>{{ item }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        {% with foo = [1,2,3] %}
+            {% for item in foo %}
+                <p>{{ item }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        {% include 'common/List.html' %}
+
+        {% include 'common/footer.html' %}
+    </body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}
+            Base Title
+        {% endblock %}
+    </title>
+</head>
+<body>
+{% block list %}
+    <ul>
+        <li>國際</li>
+        <li>軍事</li>
+        <li>財經</li>
+        <li>娯樂</li>
+    </ul>
+{% endblock %}
+
+{% block footer %}
+    <div class="footer">
+        底部
+        {% block foo %}
+            <div class="foo">
+                    foo
+            </div>
+        {% endblock %}
+    </div>
+{% endblock%}
+
+</body>
+</html>

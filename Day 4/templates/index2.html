@@ -1,0 +1,23 @@
+
+<p>這是我在子模版的p</p> <!-- 父模版沒有的，要新加在父模版前才顯示 -->
+
+{% block title %}
+
+<title>這是Index2
+</title>
+{% endblock %}
+
+        <h1>Template Inheritance</h1>
+        {% extends 'base.html' %}
+
+    {% block footer %}
+        <div class="footer">
+            這是底部
+            {% block foo %}
+                f
+            {% endblock %}
+
+        </div>
+    {% endblock %}
+
+    <p>這是我在子模版的p</p> <!-- 父模版沒有的，後加就不會顯示 -->
