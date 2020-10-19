@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block header_title %}
+    <h1>電影</h1>
+{% endblock %}
+
+{% block content %}
+    {% for item in items %}
+    {{ itemGroup(item.thumbnail, item.title, item.rating)}}
+    {% endfor %}
+{% endblock %}
