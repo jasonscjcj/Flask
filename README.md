@@ -612,7 +612,6 @@ def macro():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 ```
 
 macro.html
@@ -666,6 +665,411 @@ other.html
 <p>密碼︰{{input('password', type='password')}}</p>
 
 </body>
+```
+### Day 4
+
+##### include
+
+include
+```
+{% include 'xxx.html' %}
+```
+
+##### set
+
+set賦值語句
+
+```
+{% set name='xxx' %} 全局變量
+
+{% with %}
+	{% set name='xxx' %} 局部變量
+{% endwith %}
+
+{% with xxx = '' %}
+{% endwith %}
 
 ```
 
+##### 模版繼承
+
+```
+{% extends 'xxx.html' %}
+
+{% block footer %}
+
+{% endblock %}
+```
+
+##### 加載靜態資源文件
+
+- 靜態資源文件夾
+ - static/css/xxx.css
+```html
+<link src="{{ url_for('static', filename='css/xxx.css')}}"
+```
+ - static/js/xxx.js
+```html
+<script src="{{ url_for('static', filename='js/xxx.js')}}"></script>
+```
+ - static/images/xxx.png|xxx.jpg|xxx.jpeg|...
+```html
+<img src="{{ url_for('static', filename='images/xxx.png')}}" alt="">
+```
+
+##### 豆辨案例思路
+- 書寫一個視圖函數和html文件
+- 把所有index裏面的所有代碼放在base.html
+- 抽離marco放到marco.html
+- 在base.html書寫block，供子模板list.html, index.html使用，留一個空白的block調用marco的代碼
+- 刪除index.html所有代碼，留下使用marco的代碼
+- 把marco導入base.html裏面
+- 再把父模板導入到index.html裏面 
+```
+{% extends 'base.html' %}
+```
+- 在index.html裏面重寫block，調用marco
+- 在marco裏面傳递一個category這個參數，'更多'按鈕需要修改這個跳轉地址，用url_for的方式傳入視圖函數的名稱，後面傳入category這個參數
+- 在視圖函數中接收category這個參數，設定個初始值，對category這個參數進行判斷，當判斷為1時，返回items=movies，當判斷為2時，返回items=tvs，最後返回給模板
+- index.html listGroup加入1,2的參數來判斷那一個category
+```
+{% block content %}
+    {{ listGroup('電影', movies, 1) }}
+    <hr>
+    {{ listGroup('電視劇', tvs, 2) }}
+{% endblock %}
+```
+- list.html copy index.html裏的代碼，重寫block
+
+##### 豆辨案例所有代碼
+base.html
+```html
+{% from 'macro.html' import itemGroup, listGroup %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}
+        Title
+        {% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/item.css')}}">
+</head>
+<body>
+
+    {% block header_title %}
+        <h1>豆瓣小程序評分</h1>
+    {% endblock %}
+
+    <div class="container">
+        <div class="search-group">
+            <input type="text" class="search-input">
+        </div>
+
+        {% block content %}
+
+        {% endblock %}
+    </div>
+
+</body>
+</html>
+```
+
+marco.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% macro itemGroup(src, title, rating) %}
+  <div class="item-group">
+    <img src="{{ src }}" alt="" class="thumbnail">
+    <p class="item-title">{{ title }}</p>
+    <p class="item-rating">
+        {% set lights = ((rating|int)/2)|int %}
+        {% set half_lights = (rating|int)%2 %}
+        {% set grays = 5-lights-half_lights %}
+
+        {% for light in range(0, lights) %}
+            <img src="{{ url_for('static', filename='images/rate_light.png') }}" alt="">
+        {% endfor %}
+
+        {% for half in range(0, half_lights) %}
+            <img src="{{ url_for('static', filename='images/rate_half.png') }}" alt="">
+        {% endfor %}
+
+        {% for gray in range(0, grays) %}
+            <img src="{{ url_for('static', filename='images/rate_gray.png') }}" alt="">
+        {% endfor %}
+        {{ rating }}
+    </p>
+  </div>
+{% endmacro %}
+
+
+{% macro listGroup(module_title, items, category=category) %}
+    <div class="item-list-group">
+        <div class="item-list-top">
+            <span class="module-title">{{ module_title }}</span>
+            <a href="{{ url_for('movie_list', category=category) }}" class="more-btn">更多</a>
+        </div>
+        <div class="list-group">
+            {% for item in  items[0:3] %}
+                {{ itemGroup(item.thumbnail, item.title, item.rating) }}
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro %}
+</body>
+</html>
+```
+
+list.html
+```html
+{% extends 'base.html' %}
+
+{% block header_title %}
+    <h1>電影</h1>
+{% endblock %}
+
+{% block content %}
+    {% for item in items %}
+    {{ itemGroup(item.thumbnail, item.title, item.rating)}}
+    {% endfor %}
+{% endblock %}
+```
+
+index.html
+```html
+{% extends 'base.html' %}
+
+{% block header_title %}
+    <h1>豆瓣小程序評分</h1>
+{% endblock %}
+
+{% block content %}
+    {{ listGroup('電影', movies, 1) }}
+    <hr>
+    {{ listGroup('電視劇', tvs, 2) }}
+{% endblock %}
+```
+
+douban_tut.py
+```python
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+# 电影
+movies = [
+    {
+        'id': '11211',
+        'thumbnail': 'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2499792043.webp',
+        'title': u'王牌特⼯2：⻩⾦圈',
+        'rating': u'7.3',
+        'comment_count': 12000,
+        'authors': u'科林·费尔斯 / 塔伦·埃格顿 / 朱丽安·摩尔'
+    },
+    {
+        'id': '34532',
+        'title': u'羞羞的铁拳',
+        'thumbnail': 'https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p2499793218.webp',
+        'rating': u'7.6',
+        'comment_count': 39450,
+        'authors': u'艾伦/⻢丽/沈腾'
+    },
+    {
+        'id': '394558',
+        'title': u'情圣',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/mpst/public/p2409022364.jpg',
+        'rating': u'6.3',
+        'comment_count': 38409,
+        'authors': u'肖央 / 闫妮 / ⼩沈阳'
+    },
+    {
+        'id': '9384089',
+        'title': u'全球⻛暴',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2501863104.webp',
+        'rating': u'7.4',
+
+        'comment_count': 4555,
+        'authors': u'杰拉德·巴特勒/吉姆·斯特'
+    },
+    {
+        'id': '26921827',
+        'title': u'⼤卫⻉肯之倒霉特⼯熊',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/mpst/public/p2408893200.jpg',
+        'rating': u'4.3',
+        'comment_count': 682,
+        'authors': u'汤⽔⾬ / 徐佳琪 / 杨默'
+    },
+    {
+        'id': '26287884',
+        'title': u'追⻰',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2499052494.webp',
+        'rating': u'7.5',
+        'comment_count': 33060,
+        'authors': u'查理兹·塞隆 / 阿特·帕⾦森 / 拉尔夫·费因斯'
+    }
+]
+
+# 电视剧
+tvs = [
+    {
+        'id': '235434',
+        'title': u'⻤吹灯之精绝古城',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2404604903.jpg',
+        'rating': u'8.4',
+        'comment_count': 49328,
+        'authors': u'靳东 / 陈乔恩 / 赵达 / 付枚 / ⾦泽灏 /'
+    },
+    {
+        'id': '9498327',
+        'title': u'孤芳不⾃赏',
+        'thumbnail': u'https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p2407425119.jpg',
+        'rating': u'3.7',
+
+        'comment_count': 8493,
+        'authors': u'钟汉良 / 杨颖 / ⽢婷婷 / 孙艺洲 / 亓航 /'
+    },
+    {
+        'id': '26685451',
+        'title': u'全球⻛暴',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2501769525.webp',
+        'rating': u'8.2',
+        'comment_count': 345,
+        'authors': u' 卢克·崔德威 / 琼安·弗洛加特 / 露塔·格德⽶纳斯 /安东尼·海德 / 卡罗琳·古多尔 / '
+    },
+    {
+        'id': '235434',
+        'title': u'其他⼈',
+        'thumbnail': u'https://img3.doubanio.com/view/movie_poster_cover/lpst/public/p2371503632.jpg',
+        'rating': u'7.6',
+        'comment_count': 25532,
+        'authors': u'杰⻄·普莱蒙 / 莫莉·⾹侬 / 布莱德利·惠特福德 / MaudeApatow / ⻨迪逊·⻉蒂 / '
+    },
+    {
+        'id': '48373095',
+        'title': u'全员单恋',
+        'thumbnail': u'https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p2367986708.jpg',
+        'rating': u'6.4',
+        'comment_count': 2483,
+        'authors': u'伊藤沙莉 / 中川⼤志 / 上原实矩 / 森绘梨佳 / 樱⽥通/ '
+    },
+    {
+        'id': '292843',
+        'title': u'废纸板拳击⼿',
+        'thumbnail': u'https://img1.doubanio.com/view/movie_poster_cover/lpst/public/p2380194237.jpg',
+        'rating': u'8.2',
+        'comment_count': 23456,
+
+        'authors': u'托⻢斯·哈登·丘奇 / 泰伦斯·霍华德 / 波伊德·霍布鲁克/ 瑞斯·维克菲尔德 / ⻢尔洛·托⻢斯 / '
+    }
+]
+
+
+@app.route('/')
+def home():
+    context = {
+        'movies': movies,
+        'tvs': tvs
+    }
+    return render_template('index.html', **context)
+
+
+@app.route('/list/')
+# @app.route('/list') # 這樣也可以做，weblink會更美觀
+def movie_list():
+    # /list/?category=category
+    # /list?category=category
+    items = None
+    category = int(request.args.get('category'))
+    if category == 1:
+        items = movies
+    elif category == 2:
+        items = tvs
+    return render_template('list.html', items=items)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+```
+
+
+### Day 5
+
+##### 視圖高級
+
+###### 標準類視圖
+
+- 大大的減少了路由的書寫
+
+- 可以繼承父類的許多方法，減少代碼冗餘
+
+```
+視圖函數
+@app.route('/xxx/')
+
+類視圖
+# view_func 一定要寫
+# endpoint 不一定要寫
+app.add_url_rule('/xxx/', view_func=類名.as_view('取名'))
+app.add_url_rule('/xxx/', endpoint='取名' view_func=類名.as_view('取名'))
+```
+- <span style="color:red">一定要重寫一個dispatch_request,沒有重寫會報 raise NotImplementedError()</span>
+
+  ### Day 6
+
+##### 藍圖
+
+###### 基于調度方法的視圖
+
+```python
+class xxxx(views.MethodView):
+	def get(self):
+		pass
+	
+	def post(self):
+		pass
+```
+
+###### 藍圖的基本使用
+
+1. 在Flask主文件同級目級下創建藍圖文件
+2. 創建藍圖py文件
+3. 從Flask中導入Blueprint
+4. 創建藍圖實例
+5. 映射路由和函數
+6. 在主文件中導入藍圖
+7. 在app下注冊藍圖
+
+
+###### Flask 藍圖調用模板文件
+1. 模板文件默認是在文件同級目錄下的templates
+2. 直接在藍圖中渲染模板文件
+3. 如果需要改目錄，可以在創建實例的時候制定template_folder='xxx', 如果制定了模板目錄，在默認的templates下面沒有這個模板文件，他才會去到制定的模板目錄下尋找
+
+###### Flask 藍圖調用靜態文件
+1. 模板文件默認是在主文件同級目錄下的static
+2. 如果需要制定文件目錄，使用static_folder='xxx', 加載文件的過程同樣也是現在默認的文件目錄下加載，然後再去藍圖目錄下的文件加載
+3. url_for 藍圖名稱，視圖名稱
+
+
+##### 子域名
+1. 創建xxx.py藍圖文件
+2. 創建藍圖實例的時候，要加上subdomain='xxx'
+3. 導入加注冊藍圖
+4. 修改電腦本機配置 C:\Windows\System32\drivers\etc\hosts
+```
+127.0.0.1   jason.com
+127.0.0.1   cms.jason.com
+```
+5. 修改服務器名稱配置
+```
+app.config['SERVER_NAME'] = 'jason.com:8000'
+```
