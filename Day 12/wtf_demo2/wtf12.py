@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template
-from formValid import RegisterForm
+from formValid import RegisterForm, LoginForm
+
 app = Flask(__name__)
+
 
 @app.route('/')
 def index():
@@ -29,6 +31,20 @@ def register():
         else:
             print(form.errors)
             return '註冊失敗'
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        form = LoginForm(request.form)
+        if form.validate():
+            return '註冊成功'
+        else:
+            print(form.errors)
+            return '註冊失敗'
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -4,6 +4,7 @@ from middleware import db
 from flask_app import app
 
 # 需要映射那個模型，就把哪個模型導入進來
+from models.users import User
 
 manage = Manager(app)
 
