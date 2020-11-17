@@ -1,0 +1,11 @@
+HOSTNAME = "127.0.0.1"
+DATABASE = "day14"
+PORT = 3306
+USERNAME = "root"
+PASSWORD = "1234"
+
+DB_URL = "mysql+pymysql://{}:{}@{}:{}/{}".format(USERNAME, PASSWORD, HOSTNAME, PORT, DATABASE)
+
+# 映射數據庫
+SQLALCHEMY_DATABASE_URI = DB_URL
+SQLALCHEMY_TRACK_MODIFICATIONS = False  # 不顯示警句字句
